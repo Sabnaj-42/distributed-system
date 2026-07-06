@@ -27,6 +27,7 @@ Kubecost runs **inside your cluster** and joins two data streams:
 ```
 
 ### The allocation algorithm, step by step
+
 1. **Price out each node** per hour, and split that price into CPU / RAM / GPU components.
 2. **Charge each pod** for its share of the node: per resource, charge `max(request, actual usage)` × resource unit price. Using `max` means you pay for what you *reserved* even if idle — reservations block others from scheduling there (this rule is what makes over-requesting visible as cost).
 3. **Add shared items**: persistent volumes, load balancers, network egress (network attribution is genuinely hard and approximate).
@@ -34,6 +35,7 @@ Kubecost runs **inside your cluster** and joins two data streams:
 5. **Aggregate** by any Kubernetes dimension: namespace, deployment, label (`team=payments`), annotation → dashboards, alerts, showback/chargeback reports.
 
 ### The three magic numbers
+
 - **Idle cost**: provisioned-but-unrequested capacity — *cluster-level* waste (bin-packing/autoscaler problem).
 - **Cost efficiency** = usage / request — *workload-level* waste (over-requesting problem). A pod requesting 4 CPU using 0.2 → 5% efficient.
 - **Total waste** ≈ idle + inefficiency. Kubecost's reports splitting these tell you *which tool/fix* you need — that decomposition is the product's core intellectual contribution.
@@ -43,6 +45,7 @@ Kubecost runs **inside your cluster** and joins two data streams:
 ## 3. From visibility to action
 
 On top of measurement, Kubecost layers:
+
 - **Rightsizing recommendations**: per-container request suggestions from usage percentiles (e.g., set request = P98 of usage + headroom) — apply manually or via automation.
 - **Cluster/node recommendations**: cheaper instance types, consolidation opportunities.
 - **Budgets & alerts**: "namespace X exceeded $5k/mo," anomaly detection on spend spikes.
@@ -58,7 +61,7 @@ This tool category = **FinOps** (cloud financial operations): making engineering
 
 ---
 
-## 5. Distributed-systems angles worth mentioning
+### 5. Distributed-systems angles worth mentioning
 
 1. **It's a metering pipeline**: high-cardinality time series (per-container, per-minute) → aggregation → attribution. All the TSDB machinery — cardinality limits, downsampling, retention — applies directly ([../02-distributed-storage/time-series-database.md](../02-distributed-storage/time-series-database.md)).
 2. **Attribution of shared resources is fundamentally arbitrary**: splitting a node's idle cost or a NAT gateway across tenants has no single correct answer — policy, not physics. Good parallel to multi-tenant fairness problems in schedulers.
